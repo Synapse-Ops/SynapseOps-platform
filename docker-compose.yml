@@ -203,7 +203,7 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka-broker:9092
       MLFLOW_TRACKING_URI: http://mlflow-server:5000
       STORAGE_BASE_PATH: /storage
-      STORAGE_MAX_FILE_SIZE_MB: ${STORAGE_MAX_FILE_SIZE_MB:-500}
+      STORAGE_MAX_FILE_SIZE_MB: ${STORAGE_MAX_FILE_SIZE_MB:-1000}
       STORAGE_MAX_WORKSPACE_MB: ${STORAGE_MAX_WORKSPACE_MB:-2000}
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
@@ -283,9 +283,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: /api/v1    
+        VITE_API_BASE_URL: /api/v1
     container_name: frontend-app
     restart: unless-stopped
+    environment:
+      # Límite de subida de nginx (client_max_body_size), resuelto por envsubst al
+      # arrancar — misma variable/fuente de verdad que backend-orchestrator arriba.
+      STORAGE_MAX_FILE_SIZE_MB: ${STORAGE_MAX_FILE_SIZE_MB:-1000}
     ports:
       - "3000:80"
     networks:
