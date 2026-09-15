@@ -66,6 +66,9 @@ export function IngestActions({
         descriptor = kerasDataset
       } else if (mode === 'url') {
         if (!url?.trim()) throw new Error('Ingresa una URL válida.')
+        notify.info('Descargando dataset...', {
+          description: 'Puede tardar varios minutos según el tamaño del archivo. No cierres esta pestaña.',
+        })
         await uploadDatasetFromUrl(token, workspaceId, url.trim())
         descriptor = 'URL'
       } else {

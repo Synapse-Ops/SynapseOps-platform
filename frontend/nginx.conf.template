@@ -4,8 +4,10 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
-    # Permitir uploads de datasets hasta 500 MB
-    client_max_body_size 500m;
+    # Límite de subida — atado a STORAGE_MAX_FILE_SIZE_MB (misma fuente de verdad que
+    # el backend en application.yaml). Sustituido por envsubst al arrancar el contenedor
+    # (ver Dockerfile: NGINX_ENVSUBST_FILTER limita el envsubst a esta única variable).
+    client_max_body_size ${STORAGE_MAX_FILE_SIZE_MB}m;
 
     # React Router — todas las rutas SPA retornan index.html
     location / {

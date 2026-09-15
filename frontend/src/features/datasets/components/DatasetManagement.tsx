@@ -17,6 +17,7 @@ import {
   getStorageUsage,
   listMyWorkspaces,
   listWorkspacePipelines,
+  registerKerasDataset,
   uploadDataset,
   uploadDatasetFromUrl,
   type StorageUsage,
@@ -121,7 +122,7 @@ export function DatasetManagement({ token }: DatasetManagementProps) {
       } else if (replaceMode === 'url' && replaceUrl.trim()) {
         await uploadDatasetFromUrl(token, ws.idWorkspace, replaceUrl.trim())
       } else if (replaceMode === 'keras') {
-        await uploadDatasetFromUrl(token, ws.idWorkspace, `__keras__${replaceKeras}`)
+        await registerKerasDataset(token, ws.idWorkspace, replaceKeras)
       }
       notify.success('Dataset actualizado', { description: `Workspace: ${ws.name}` })
       setSelectedWs(null)
