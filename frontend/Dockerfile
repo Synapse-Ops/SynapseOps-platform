@@ -23,11 +23,15 @@ FROM nginx:1.25-alpine
 # Copiar build de Vite al directorio de nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copiar configuración de nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Eliminar config default de nginx que interfiere
-RUN rm -f /etc/nginx/conf.d/default.conf.bak
+# Copiar configuración de nginx como template — el entrypoint oficial de la imagen
+# (docker-entrypoint.d/20-envsubst-on-templates.sh) la resuelve a conf.d/default.conf
+# al arrancar el contenedor, sustituyendo STORAGE_MAX_FILE_SIZE_MB por su valor real
+# (docker-compose.yml se lo pasa). NGINX_ENVSUBST_FILTER limita la sustitución a esa
+# única variable para no pisar las variables propias de nginx ($host, $remote_addr, etc.)
+# que también aparecen en el archivo.
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+ENV STORAGE_MAX_FILE_SIZE_MB=1000
+ENV NGINX_ENVSUBST_FILTER='^STORAGE_MAX_FILE_SIZE_MB$'
 
 EXPOSE 80
 

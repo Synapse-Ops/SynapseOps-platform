@@ -320,6 +320,9 @@ public class DatasetController {
                                                             }
                                                             workspace.setDatasetPath(storedPath);
                                                             workspaceRepository.save(workspace);
+                                                            log.info("Ingesta URL completada para "
+                                                                    + "workspace {}: {}",
+                                                                    workspaceId, storedPath);
                                                             return storedPath;
                                                         }).subscribeOn(Schedulers.boundedElastic()))
                                                 .onErrorResume(java.io.IOException.class, ex -> {
@@ -343,8 +346,15 @@ public class DatasetController {
      */
     private void downloadToFile(String urlStr, Path target)
             throws java.io.IOException, java.net.URISyntaxException {
-        java.net.HttpURLConnection conn = (java.net.HttpURLConnection)
-                new java.net.URI(urlStr).toURL().openConnection();
+        java.net.HttpURLConnection conn;
+        try {
+            conn = (java.net.HttpURLConnection) new java.net.URI(urlStr).toURL().openConnection();
+        } catch (IllegalArgumentException | java.net.MalformedURLException e) {
+            log.error("Ingesta URL: URL inválida {}", urlStr, e);
+            throw new IllegalArgumentException(
+                    "La URL no es válida. Debe ser una dirección http(s) completa a un "
+                    + "archivo descargable.");
+        }
         conn.setRequestProperty("User-Agent",
                 "Mozilla/5.0 (compatible; SynapseOps/1.0; dataset-ingest)");
         conn.setRequestProperty("Accept", "*/*");
